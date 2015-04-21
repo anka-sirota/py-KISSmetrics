@@ -14,6 +14,32 @@ except ImportError:
     from urllib.parse import urlencode
 
 
+def encode_object(obj):
+    """
+    Encode iterable values with UTF8,
+    to avoid UnicodeEncodeError thrown by urlencode.
+
+    :param obj: dict, list or tuple
+    :returns: new object with UTF8-encoded values
+    :rtype: iterable
+    """
+    def _encode_value(value):
+        if isinstance(value, unicode):
+            return value.encode('utf8')
+        if isinstance(value, str):
+            # Must be encoded in UTF-8
+            return value.decode('utf8')
+        return value
+
+    if isinstance(obj, dict):
+        return {k: _encode_value(v) for k, v in obj.iteritems()}
+
+    # list or tuple (not string or dict)
+    if hasattr(obj, '__iter__'):
+        return [_encode_value(v) for v in obj]
+    return obj
+
+
 def create_query(key, person, event=None, timestamp=None,
                  identity=None, properties=None):
     """Build and encode query string.
@@ -49,4 +75,4 @@ def create_query(key, person, event=None, timestamp=None,
     if identity:
         query_dict[ALIAS_KEY] = identity
     query_dict.update(properties)
-    return urlencode(query_dict)
+    return urlencode(encode_object(query_dict))
