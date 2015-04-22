@@ -82,6 +82,18 @@ class KISSmetricsRequestTestCase(unittest.TestCase):
         assert parse_qs(query)['_p'] == ['bar']
         assert parse_qs(query)['_n'] == ['fizzed']
 
+    def test_event_unicode(self):
+        properties = {'fn': u'Róbert', u'foó': u'Rafa\u0142'}
+        data = {'event': u'informação', 'properties': properties}
+        query = KISSmetrics.query_string.create_query(key='foo', person='bar', **data)
+        assert parse_qs(query)['_k'] == ['foo']
+        assert parse_qs(query)['_p'] == ['bar']
+        # compare as str
+        assert parse_qs(query)['fn'] == [properties['fn'].encode('utf8')]
+        assert parse_qs(query)[u'foó'.encode('utf8')] == [properties[u'foó'].encode('utf8')]
+        # compare as unicode
+        assert parse_qs(query)['_n'][0].decode('utf8') == u'informação'
+
     def test_set(self):
         properties = {'cool': '1'}
         query = KISSmetrics.query_string.create_query(key='foo', person='bar', properties=properties)

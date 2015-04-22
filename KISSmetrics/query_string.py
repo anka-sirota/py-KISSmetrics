@@ -32,7 +32,7 @@ def encode_object(obj):
         return value
 
     if isinstance(obj, dict):
-        return {k: _encode_value(v) for k, v in obj.iteritems()}
+        return {_encode_value(k): _encode_value(v) for k, v in obj.items()}
 
     # list or tuple (not string or dict)
     if hasattr(obj, '__iter__'):
